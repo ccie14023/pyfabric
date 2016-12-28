@@ -1,0 +1,6 @@
+<ip>
+<vrf>
+<name>{{ vrf_name }}</name>
+<rd>{{ rd }}</rd>
+</vrf>
+</ip>

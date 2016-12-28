@@ -1,0 +1,79 @@
+ip vrf Contractors
+ rd 1:969205673
+ route-target export 1:969205673
+ route-target import 1:969205673
+!
+ip vrf Employees
+ rd 1:1832324236
+ route-target export 1:1832324236
+ route-target import 1:1832324236
+!
+ip vrf IoT
+ rd 1:1344302283
+ route-target export 1:1344302283
+ route-target import 1:1344302283
+
+ vlan 3000
+ name Employees_172_16_101_0
+
+ interface GigabitEthernet1/0/1
+ description Configured_by_Python
+ switchport mode access
+ switchport voice vlan 4000
+ authentication control-direction in
+ authentication event server dead action authorize vlan 3999
+ authentication host-mode multi-auth
+ authentication order dot1x mab
+ authentication priority dot1x mab
+ authentication port-control auto
+ authentication periodic
+ authentication timer reauthenticate server
+ authentication timer inactivity server dynamic
+ mab
+ dot1x pae authenticator
+ dot1x timeout tx-period 10
+ spanning-tree portfast
+
+ interface Vlan3000
+ description Configured_by_Python
+ ip vrf forwarding Employees
+ ip dhcp relay source-interface Loopback0
+ ip address 172.16.101.1 255.255.255.0
+ ip helper-address global 1.1.1.1
+ no ip redirects
+ ip local-proxy-arp
+ ip route-cache same-interface
+ no lisp mobility liveness test
+ lisp mobility Employees_172_16_101_0
+!
+router lisp
+ encapsulation vxlan
+ locator-table default
+ locator-set rloc_e3c91ac1-59e3-4621-9f6b-f842e6c2dd4e
+  IPv4-interface Loopback0 priority 10 weight 10
+  exit
+ !
+ eid-table default instance-id 0
+  exit
+ !
+ eid-table vrf Employees instance-id 10
+  dynamic-eid Employees_172_16_101_0
+   database-mapping 172.16.101.0/24 locator-set rloc_e3c91ac1-59e3-4621-9f6b-f842e6c2dd4e
+   exit
+  !
+  exit
+ !
+ eid-table vrf Contractors instance-id 11
+  exit
+ !
+ eid-table vrf IoT instance-id 12
+  exit
+ !
+ disable-ttl-propagate
+ ipv4 sgt
+ ipv4 use-petr 192.168.110.1
+ ipv4 itr map-resolver 192.168.110.1
+ ipv4 itr
+ ipv4 etr map-server 192.168.110.1 key uci
+ ipv4 etr
+ exit
