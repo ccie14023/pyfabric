@@ -19,29 +19,17 @@
         <instance-id>0</instance-id>
         <default/>
       </instance-list>
-      {% for vrf, id in vrf_list %}
-        <instance-list>
-        <instance-id>{{ id }}</instance-id>
-        <vrf>{{ vrf }}</vrf>
-        <dynamic-eid>
-          <name>Employee_172_16_101_0</name>
-          <database-mapping>
-            <eid-prefix>172.16.101.0/24</eid-prefix>
-            <locator-set>rloc1</locator-set>
-          </database-mapping>
-        </dynamic-eid>
-      </instance-list>
-      {% endfor %}
+      
     </eid-table>
     <disable-ttl-propagate/>
     <ipv4>
       <sgt/>
       <use-petr>
-        <locator-address>{{ border_ip }}</locator-address>
+        <locator-address>192.168.110.1</locator-address>
       </use-petr>
       <itr>
         <map-resolver>
-          <ip-addr>{{ border_ip }}</ip-addr>
+          <ip-addr>192.168.110.1</ip-addr>
         </map-resolver>
       </itr>
       <itr-enable>
@@ -49,7 +37,7 @@
       </itr-enable>
       <etr>
         <map-server>
-          <ip-addr>{{ border_ip }}</ip-addr>
+          <ip-addr>192.168.110.1</ip-addr>
         <key>
           <key-0>uci</key-0>
         </key>
