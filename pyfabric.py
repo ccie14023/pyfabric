@@ -32,6 +32,30 @@ def build_lisp_mobility_strings(pools):
 
 	return lm
 
+def build_pool_dict(params, lm):
+
+	"""
+		The YAML file allows you to list the pools in any order, regardless of VRF.  However,
+		we can't pass this to the J2 template.  Therefore we will create a dictionary which
+		has the pools listed in order of VRF.
+	"""
+
+	pool_dict = {}
+
+	for vrf in params['vrfs']:
+		pool_dict[vrf] = []
+
+	for vrf in pool_dict:
+		for pool in params['pools']:
+			if pool['vrf'] == vrf:
+			  new_pool = {k:v for k,v in pool.items()}  # copy the current pool to new dict
+			  new_pool['lmd'] = lm[new_pool['subnet']]
+			  pool_dict[vrf].append(new_pool)
+
+	return pool_dict
+
+
+
 def render_xml(params, ids):
 
 	x_file = open("lisp.xml","r")
@@ -53,8 +77,10 @@ if __name__ == "__main__":
 	instance_id = BASE_INSTANCE_ID
 	for vrf in params['vrfs']:
 		instance_ids.append(instance_id)
-		instance_id = instance_id + 10
+		instance_id += 1
 
 	lm = build_lisp_mobility_strings(params['pools'])
 
-	render_xml(params, instance_ids)
+	pools = build_pool_dict(params,lm)
+
+	print render_xml(params, instance_ids)
