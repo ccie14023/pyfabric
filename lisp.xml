@@ -19,17 +19,21 @@
         <instance-id>0</instance-id>
         <default/>
       </instance-list>
-      {% for vrf, id in vrf_list %}
+      {% for vrf in vrf_list %}
         <instance-list>
-        <instance-id>{{ id }}</instance-id>
-        <vrf>{{ vrf }}</vrf>
+        <instance-id>{{ vrf['id'] }}</instance-id>
+        <vrf>{{ vrf['name'] }}</vrf>
+        
+        {% for pool in vrf['pools'] %}
         <dynamic-eid>
-          <name>Employee_172_16_101_0</name>
+          <name>{{ pool['lmd'] }}</name>
           <database-mapping>
-            <eid-prefix>172.16.101.0/24</eid-prefix>
+            <eid-prefix>{{ pool['subnet'] }}{{ pool['mask'] }}</eid-prefix>
             <locator-set>rloc1</locator-set>
           </database-mapping>
         </dynamic-eid>
+        {% endfor %}
+
       </instance-list>
       {% endfor %}
     </eid-table>

@@ -3,24 +3,21 @@
 border:  '192.168.110.1'
 
 vrfs:
-  - Employees
-  - Contractors
-  - IoT
-
-pools:
-  - subnet: '172.16.101.0'
-    mask: '255.255.255.0'
-    gw: '172.16.101.1'
-    vrf: Employees 
-  - subnet: '172.16.102.0'
-    mask: '255.255.255.0'
-    gw: '172.16.102.1'
-    vrf: Employees 
-  - subnet: '172.16.201.0'
-    mask: '255.255.255.0'
-    gw: '172.16.201.1'
-    vrf: Contractors
-  - subnet: '172.16.211.0'
-    mask: '255.255.255.0'
-    gw: '172.16.211.1'
-    vrf: IoT 
+  - name: Employees
+    pools:
+      - subnet: '172.16.101.0'
+        mask: '/24'
+        gw: '172.16.101.1'
+      - subnet: '172.16.102.0'
+        mask: '/24'
+        gw: '172.16.102.1'
+  - name: Contractors
+    pools:
+      - subnet: '172.16.201.0'
+        mask: '/24'
+        gw: '172.16.201.1'
+  - name: IoT
+    pools:
+      - subnet: '172.16.211.0'
+        mask: '/24'
+        gw: '172.16.211.1'
