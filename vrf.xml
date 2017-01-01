@@ -1,6 +1,7 @@
+{% for vrf in params['vrfs'] %}
 <ip>
 <vrf>
-<name>{{ vrf_name }}</name>
-<rd>{{ rd }}</rd>
+<name>{{ vrf['name'] }}</name>
 </vrf>
 </ip>
+{% endfor %}

@@ -56,7 +56,6 @@ def render_xml(params, template_file):
 
 
 	return t.render(params=params)
-	#return t.render(border_ip = params['border'], vrf_list=params['vrfs'])
 
 def send_nc(xml_string):
 
@@ -76,10 +75,9 @@ def send_nc(xml_string):
 
 if __name__ == "__main__":
 
-	params = load_yaml(CONFIG_FILE)  #  load base params from YAML config
-	params = build_lisp_mobility_strings(params)  #  add mobility strings to each pool
-	params = build_instance_ids(params)  #  add instance id's to each VRF
+	fabric_conf = load_yaml(CONFIG_FILE)  #  load base params from YAML config
+	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
+	fabric_conf = build_instance_ids(fabric_conf)  #  add instance id's to each VRF
 
-	print render_xml(params, "lisp.xml")
-
-	#send_nc(render_xml(params, "lisp.xml"))
+	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
+	send_nc(render_xml(fabric_conf, "lisp.xml"))

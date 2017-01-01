@@ -1,6 +1,14 @@
 ---
 
 border:  '192.168.110.1'
+voice-vlan: 4000
+server-dead-vlan: 3999
+
+host-ifs:
+  - type: "GigabitEthernet"
+  - base: "1/0/"
+  - min: 1
+  - max: 24
 
 vrfs:
   - name: Employees
