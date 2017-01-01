@@ -7,6 +7,9 @@ from ncclient import manager
 
 CONFIG_FILE = "fabric.yml"
 BASE_INSTANCE_ID = 10
+USERNAME = 'admin'
+PASSWORD = 'cisco123'
+HOST = '172.26.244.61'
 
 def load_yaml(filename):
 
@@ -43,22 +46,32 @@ def build_instance_ids(params):
 
 	return params
 
-def render_xml(params):
+def render_xml(params, template_file):
 
-	x_file = open("lisp.xml","r")
-	xml_template = x_file.read()
-	x_file.close()
+	xml_file = open(template_file,"r")
+	xml_template = xml_file.read()
+	xml_file.close()
 
 	t = jinja2.Template(xml_template)
 
-	return t.render(border_ip = params['border'], vrf_list=params['vrfs'])
+
+	return t.render(params=params)
+	#return t.render(border_ip = params['border'], vrf_list=params['vrfs'])
 
 def send_nc(xml_string):
 
-	xml_data = """<config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"><native xmlns="http://cisco.com/ns/yang/ned/ios">"""
-	xml_data = xml_data + xml_string + "</native></config>"
+	"""
+	Sends configuration to the device.  Takes a raw XML string and adds
+	NC headers before sending.
+	"""
 
-	print xml_data
+	snippet = """<config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"><native xmlns="http://cisco.com/ns/yang/ned/ios">"""
+	snippet = snippet + xml_string + "</native></config>"
+
+	with manager.connect(host=HOST, port=830, username=USERNAME,password=PASSWORD) as m:
+		assert(":validate" in m.server_capabilities)
+		m.edit_config(target='running', config=snippet,
+	    	test_option='test-then-set',error_option=None)
 
 
 if __name__ == "__main__":
@@ -67,4 +80,6 @@ if __name__ == "__main__":
 	params = build_lisp_mobility_strings(params)  #  add mobility strings to each pool
 	params = build_instance_ids(params)  #  add instance id's to each VRF
 
-	send_nc(render_xml(params))
+	print render_xml(params, "lisp.xml")
+
+	#send_nc(render_xml(params, "lisp.xml"))
