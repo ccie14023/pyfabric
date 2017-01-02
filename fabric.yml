@@ -1,31 +1,32 @@
 ---
 
 border:  '192.168.110.1'
-voice-vlan: 4000
-server-dead-vlan: 3999
+base_vlan: 3000
 
 host-ifs:
-  - type: "GigabitEthernet"
-  - base: "1/0/"
-  - min: 1
-  - max: 24
+  type: "GigabitEthernet"
+  base: "1/0/"
+  min: 1
+  max: 24
+  voice_vlan: 4000
+  server_dead_vlan: 3999
 
 vrfs:
   - name: Employees
     pools:
-      - subnet: '172.16.101.0'
-        mask: '/24'
+      - subnet: '172.16.101.0/24'
         gw: '172.16.101.1'
-      - subnet: '172.16.102.0'
-        mask: '/24'
+        helper:  '1.1.1.1'
+      - subnet: '172.16.102.0/24'
         gw: '172.16.102.1'
+        helper:  '1.1.1.1'
   - name: Contractors
     pools:
-      - subnet: '172.16.201.0'
-        mask: '/24'
+      - subnet: '172.16.201.0/24'
         gw: '172.16.201.1'
+        helper:  '2.2.2.2'
   - name: IoT
     pools:
-      - subnet: '172.16.211.0'
-        mask: '/24'
+      - subnet: '172.16.211.0/24'
         gw: '172.16.211.1'
+        helper:  '3.3.3.3'

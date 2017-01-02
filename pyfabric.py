@@ -4,6 +4,8 @@
 import jinja2
 import yaml
 from ncclient import manager
+import netaddr
+import sys
 
 CONFIG_FILE = "fabric.yml"
 BASE_INSTANCE_ID = 10
@@ -32,7 +34,8 @@ def build_lisp_mobility_strings(params):
 
 	for vrf in params['vrfs']:
 		for pool in vrf['pools']:
-			pool['lmd'] = vrf['name'] + "_" + pool['subnet'].replace('.','_')
+			lm_name = vrf['name'][:abs(20 - (len(pool['addr']) + 4))]
+			pool['lmd'] = lm_name + "_" + pool['addr'].replace('.','_')
 
 	return params
 
@@ -52,8 +55,7 @@ def render_xml(params, template_file):
 	xml_template = xml_file.read()
 	xml_file.close()
 
-	t = jinja2.Template(xml_template)
-
+	t = jinja2.Template(xml_template, trim_blocks=True, lstrip_blocks=True)
 
 	return t.render(params=params)
 
@@ -76,8 +78,25 @@ def send_nc(xml_string):
 if __name__ == "__main__":
 
 	fabric_conf = load_yaml(CONFIG_FILE)  #  load base params from YAML config
-	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
 	fabric_conf = build_instance_ids(fabric_conf)  #  add instance id's to each VRF
+	#  YAML loader reads integers as unicode.  Next two lines correct the range values so we can iterate.
+	fabric_conf['host-ifs']['min'] = int(fabric_conf['host-ifs']['min'])
+	fabric_conf['host-ifs']['max'] = int(fabric_conf['host-ifs']['max'])
+	#  Some config requires full mask, some CIDR.  Peel mask off address and add long notation mask to dict
+	#  Also add VLAN id for each pool
+	vlan_id = int(fabric_conf['base_vlan'])
+	for vrf in fabric_conf['vrfs']:
+		for pool in vrf['pools']:
+			pool['mask'] = str(netaddr.IPNetwork(pool['subnet']).netmask)
+			pool['addr'] = pool['subnet'][:-3]
+			pool['vlan_id'] = str(vlan_id)
+			vlan_id += 1
+
+	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
+
 
 	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
+	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml"))
 	send_nc(render_xml(fabric_conf, "lisp.xml"))
+	send_nc(render_xml(fabric_conf,"vlan.xml"))
+

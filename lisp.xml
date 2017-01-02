@@ -28,7 +28,7 @@
         <dynamic-eid>
           <name>{{ pool['lmd'] }}</name>
           <database-mapping>
-            <eid-prefix>{{ pool['subnet'] }}{{ pool['mask'] }}</eid-prefix>
+            <eid-prefix>{{ pool['subnet'] }}</eid-prefix>
             <locator-set>rloc1</locator-set>
           </database-mapping>
         </dynamic-eid>

@@ -1,0 +1,55 @@
+<interface>
+ {% for vrf in params['vrfs'] %}
+   {% for pool in vrf['pools'] %}
+ <Vlan>
+    <name>{{ pool['vlan_id'] }}</name>
+    <description>Configured from Python</description>
+    <ip-vrf>
+      <ip>
+        <vrf>
+          <forwarding>{{ vrf['name'] }}</forwarding>
+        </vrf>
+      </ip>
+    </ip-vrf>
+    <ip>
+      <address>
+        <primary>
+          <address>{{ pool['gw'] }}</address>
+          <mask>{{ pool['mask'] }}</mask>
+        </primary>
+      </address>
+      <helper-address>
+        <address>{{ pool['helper'] }}</address>
+      </helper-address>
+      <local-proxy-arp/>
+      <route-cache>
+        <same-interface>true</same-interface>
+      </route-cache>
+      <redirects>false</redirects>
+      <dhcp>
+        <relay>
+          <source-interface>Loopback0</source-interface>
+        </relay>
+      </dhcp>
+    </ip>
+    <lisp>
+      <mobility>
+        <dynamic-eid>
+          <dynamic-eid-name>{{ pool['lmd'] }}</dynamic-eid-name>
+        </dynamic-eid>
+      </mobility>
+    </lisp>
+  </Vlan>
+  {% endfor %}
+{% endfor %}
+</interface>
+<vlan>
+{% for vrf in params['vrfs'] %}
+  {% for pool in vrf['pools'] %}
+        <vlan-list>
+          <id>{{ pool['vlan_id'] }}</id>
+          <name>{{ pool['lmd'] }}</name>
+        </vlan-list>
+  {% endfor %}
+{% endfor %}
+</vlan>
