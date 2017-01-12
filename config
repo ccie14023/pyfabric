@@ -16,6 +16,9 @@ ip vrf IoT
  vlan 3000
  name Employees_172_16_101_0
 
+ cts role-based enforcement
+cts role-based enforcement vlan-list 3000-3002
+
  interface GigabitEthernet1/0/1
  description Configured_by_Python
  switchport mode access

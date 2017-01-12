@@ -30,6 +30,13 @@ def load_yaml(filename):
 
 def build_lisp_mobility_strings(params):
 
+	"""
+	LISP requires mobility domain strings be configured per pool.  To make them unique
+	we generate them by adding the IP address (with underscores instead of dots) to the
+	VRF name.  IOS-XE returns an error if this is longer than 20 characters, so we truncate
+	the string as needed.
+	"""
+
 	lm = {}
 
 	for vrf in params['vrfs']:
@@ -72,7 +79,7 @@ def send_nc(xml_string):
 	with manager.connect(host=HOST, port=830, username=USERNAME,password=PASSWORD) as m:
 		assert(":validate" in m.server_capabilities)
 		m.edit_config(target='running', config=snippet,
-	    	test_option='test-then-set',error_option=None)
+	    	test_option='test-then-set',error_option=None)	
 
 
 if __name__ == "__main__":
@@ -96,7 +103,7 @@ if __name__ == "__main__":
 
 
 	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
-	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml"))
-	send_nc(render_xml(fabric_conf, "lisp.xml"))
-	send_nc(render_xml(fabric_conf,"vlan.xml"))
+	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml")) # Send host-facing interface config
+	send_nc(render_xml(fabric_conf, "lisp.xml")) # Send LISP config
+	send_nc(render_xml(fabric_conf,"vlan.xml")) # Send VLAN config
 
