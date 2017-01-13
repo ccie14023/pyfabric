@@ -9,8 +9,10 @@ This script takes configuration parameters specified in a YAML file and builds a
 I recommend using a virtualenvironment so you do not cause problems with existing libraries.
 
 # Install
->>>git clone https://github.com/ccie14023/pyfabric
->>>pip install -r requirements.txt
+```
+git clone https://github.com/ccie14023/pyfabric
+pip install -r requirements.txt
+```
 
 # YAML file format
 See fabric.yml for an example file format.  Note that vrfs takes a list of VRFs for the fabric, and under each VRF a pools list has the one or more IP address pools.
