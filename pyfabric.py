@@ -86,7 +86,6 @@ def send_nc(xml_string):
 	tail = "</native></config>"
 
 	snippet = '{}{}{}'.format(head, xml_string, tail)
-	print snippet
 
 	with manager.connect(host=HOST, port=830, username=USERNAME,password=PASSWORD) as m:
 		assert(":validate" in m.server_capabilities)
