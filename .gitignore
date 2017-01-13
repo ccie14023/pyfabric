@@ -1,5 +1,6 @@
 *.md
 *.pyc
+*.swp
 config
 fabric-output*
 lisp-complete.xml
