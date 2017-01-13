@@ -48,6 +48,11 @@ def build_lisp_mobility_strings(params):
 
 def build_instance_ids(params):
 
+	"""
+	Adds instance IDs to the parameters.  These are required for LISP.
+	Takes the parameters dictionary and returns a modified version of it.
+	"""
+
 	in_id = BASE_INSTANCE_ID
 
 	for vrf in params['vrfs']:
@@ -57,6 +62,10 @@ def build_instance_ids(params):
 	return params
 
 def render_xml(params, template_file):
+
+	"""
+	Takes the fabric config dictionary and any template file, and renders it.
+	"""
 
 	xml_file = open(template_file,"r")
 	xml_template = xml_file.read()
@@ -73,37 +82,48 @@ def send_nc(xml_string):
 	NC headers before sending.
 	"""
 
-	snippet = """<config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"><native xmlns="http://cisco.com/ns/yang/ned/ios">"""
-	snippet = snippet + xml_string + "</native></config>"
+	head = """<config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"><native xmlns="http://cisco.com/ns/yang/ned/ios">"""
+	tail = "</native></config>"
+
+	snippet = '{}{}{}'.format(head, xml_string, tail)
+	print snippet
 
 	with manager.connect(host=HOST, port=830, username=USERNAME,password=PASSWORD) as m:
 		assert(":validate" in m.server_capabilities)
 		m.edit_config(target='running', config=snippet,
 	    	test_option='test-then-set',error_option=None)	
 
-
-if __name__ == "__main__":
-
-	fabric_conf = load_yaml(CONFIG_FILE)  #  load base params from YAML config
-	fabric_conf = build_instance_ids(fabric_conf)  #  add instance id's to each VRF
+def fixup_fabric_conf(config):
+	
 	#  YAML loader reads integers as unicode.  Next two lines correct the range values so we can iterate.
-	fabric_conf['host-ifs']['min'] = int(fabric_conf['host-ifs']['min'])
-	fabric_conf['host-ifs']['max'] = int(fabric_conf['host-ifs']['max'])
+	config['host-ifs']['min'] = int(config['host-ifs']['min'])
+	config['host-ifs']['max'] = int(config['host-ifs']['max'])
 	#  Some config requires full mask, some CIDR.  Peel mask off address and add long notation mask to dict
 	#  Also add VLAN id for each pool
-	vlan_id = int(fabric_conf['base_vlan'])
-	for vrf in fabric_conf['vrfs']:
+	vlan_id = int(config['base_vlan'])
+	for vrf in config['vrfs']:
 		for pool in vrf['pools']:
 			pool['mask'] = str(netaddr.IPNetwork(pool['subnet']).netmask)
 			pool['addr'] = pool['subnet'][:-3]
 			pool['vlan_id'] = str(vlan_id)
 			vlan_id += 1
 
-	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
+	return config
 
+def main():
+
+	fabric_conf = load_yaml(CONFIG_FILE)  #  load base params from YAML config
+	fabric_conf = build_instance_ids(fabric_conf)  #  add instance id's to each VRF
+	fabric_conf = fixup_fabric_conf(fabric_conf)  #  Convert unicode to ints and add full subnet masks
+	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
 
 	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
 	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml")) # Send host-facing interface config
 	send_nc(render_xml(fabric_conf, "lisp.xml")) # Send LISP config
 	send_nc(render_xml(fabric_conf,"vlan.xml")) # Send VLAN config
+
+
+if __name__ == "__main__":
+
+	main()
 
