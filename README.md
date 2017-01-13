@@ -1,3 +1,4 @@
+# pyfabric
 Python script for provisioning Cisco campus fabric
 =======
 
@@ -6,8 +7,6 @@ This script takes configuration parameters specified in a YAML file and builds a
 >  Note:  This is a very simple script and does not have error-checking, and requires hard-coding of some parameters.  It is a work-in-progress and I'm not a Python expert but it works!  Currently this works only with 16.3.2 YANG models.
 
 I recommend using a virtualenvironment so you do not cause problems with existing libraries.
-
-I assume you have configured the underlay portion of the fabric.  This script only configures overlay.
 
 # Install
 ```
