@@ -112,11 +112,13 @@ def fixup_fabric_conf(config):
 
 def main():
 
+	# Load the config from the YAML file and clean it up/add some params
 	fabric_conf = load_yaml(CONFIG_FILE)  #  load base params from YAML config
 	fabric_conf = build_instance_ids(fabric_conf)  #  add instance id's to each VRF
 	fabric_conf = fixup_fabric_conf(fabric_conf)  #  Convert unicode to ints and add full subnet masks
 	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
 
+	#  Render and send the four main code blocks to the switch
 	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
 	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml")) # Send host-facing interface config
 	send_nc(render_xml(fabric_conf, "lisp.xml")) # Send LISP config
