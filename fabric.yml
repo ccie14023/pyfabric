@@ -1,6 +1,14 @@
 ---
 
 border:  '192.168.110.1'
+edges:
+  - ip: '172.26.244.61'
+    username: 'admin'
+    password: 'cisco123'
+  - ip: '172.26.244.49'
+    username: 'admin'
+    password: 'cisco123'
+
 base_vlan: 3000
 
 host-ifs:

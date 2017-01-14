@@ -9,9 +9,6 @@ import sys
 
 CONFIG_FILE = "fabric.yml"
 BASE_INSTANCE_ID = 10
-USERNAME = 'admin'
-PASSWORD = 'cisco123'
-HOST = '172.26.244.61'
 
 def load_yaml(filename):
 
@@ -75,7 +72,7 @@ def render_xml(params, template_file):
 
 	return t.render(params=params)
 
-def send_nc(xml_string):
+def send_nc(xml_string, switch, username, password):
 
 	"""
 	Sends configuration to the device.  Takes a raw XML string and adds
@@ -87,7 +84,7 @@ def send_nc(xml_string):
 
 	snippet = '{}{}{}'.format(head, xml_string, tail)
 
-	with manager.connect(host=HOST, port=830, username=USERNAME,password=PASSWORD) as m:
+	with manager.connect(host=switch, port=830, username=username,password=password) as m:
 		assert(":validate" in m.server_capabilities)
 		m.edit_config(target='running', config=snippet,
 	    	test_option='test-then-set',error_option=None)	
@@ -117,11 +114,19 @@ def main():
 	fabric_conf = fixup_fabric_conf(fabric_conf)  #  Convert unicode to ints and add full subnet masks
 	fabric_conf = build_lisp_mobility_strings(fabric_conf)  #  add mobility strings to each pool
 
-	#  Render and send the four main code blocks to the switch
-	send_nc(render_xml(fabric_conf, "vrf.xml"))  #  Send basic VRF config
-	send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml")) # Send host-facing interface config
-	send_nc(render_xml(fabric_conf, "lisp.xml")) # Send LISP config
-	send_nc(render_xml(fabric_conf,"vlan.xml")) # Send VLAN config
+	
+	for edge in fabric_conf['edges']:
+		print "Configuring edge node with IP %s..." % edge['ip']
+		#  Render and send the four main code blocks to the switch
+		print "  Configuring VRFs..."
+		send_nc(render_xml(fabric_conf, "vrf.xml"), switch=edge['ip'], username=edge['username'], password=edge['password'])  #  Send basic VRF config
+		print "  Configuring interfaces..."
+		send_nc(render_xml(fabric_conf["host-ifs"], "interface.xml"), switch=edge['ip'], username=edge['username'], password=edge['password']) # Send host-facing interface config
+		print "  Configuring LISP..."
+		send_nc(render_xml(fabric_conf, "lisp.xml"), switch=edge['ip'], username=edge['username'], password=edge['password']) # Send LISP config
+		print "  Configuring VLANs and SVIs..."
+		send_nc(render_xml(fabric_conf,"vlan.xml"), switch=edge['ip'], username=edge['username'], password=edge['password']) # Send VLAN config
+	print "Configuration complete"
 
 
 if __name__ == "__main__":
