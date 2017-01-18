@@ -1,5 +1,6 @@
 *.pyc
 *.swp
+.gitignore
 config
 fabric-output*
 lisp-complete.xml
