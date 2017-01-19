@@ -1,5 +1,5 @@
-#  Configures a campus fabric edge node from parameters specified in fabric.yml
-#  Currently switch and login hard coded
+#  Configures campus fabric edge nodes from parameters defined in fabric.yml
+
 
 import jinja2
 import yaml
